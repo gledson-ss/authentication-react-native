@@ -5,7 +5,7 @@ import * as St from './styles';
 const List: React.FC = () => {
   return (
     <View style={St.styles.container}>
-      <Text>asdfas</Text>
+      <Text style={St.styles.title}>asdfas</Text>
     </View>
   );
 };
