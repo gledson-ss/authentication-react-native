@@ -1,26 +1,35 @@
-import React, {createContext, useState, useEffect} from 'react';
-import * as auth from '../services/auth';
+import React, {createContext, useState, useEffect, useContext} from 'react';
+import api from '../services/auth';
+import auth from '../services/auth';
 import AsynStorage from '@react-native-community/async-storage';
 interface AuthContextData {
   signed: boolean;
-  user: object | null;
   loading: boolean;
+  user: User | null;
   signIn(): Promise<void>;
   signOut(): void;
+}
+
+interface User {
+  name: string;
+  email: string;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 //JWT (Statetless)
 export const AuthProvider: React.FC = ({children}) => {
-  const [user, setUser] = useState<object | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     async function loadStorageData() {
       const storageUser = await AsynStorage.getItem('@RNAuth:user');
       const storageToken = await AsynStorage.getItem('@RNAuth:token');
 
-      if (storageToken && storageUser) {
+      if (storageUser && storageToken) {
+        api.defaults.headers['Authorization'] = `Bearer ${storageToken}`;
         setUser(JSON.parse(storageUser));
+
         setLoading(false);
       }
     }
@@ -31,6 +40,9 @@ export const AuthProvider: React.FC = ({children}) => {
     const res = await auth.signIn();
 
     setUser(res.user);
+
+    api.defaults.headers['Authorization'] = `Bearer ${res.token}`;
+
     await AsynStorage.setItem('@RNAuth:user', JSON.stringify(res.user));
     await AsynStorage.setItem('@RNAuth:token', res.token);
   }
@@ -47,4 +59,7 @@ export const AuthProvider: React.FC = ({children}) => {
   );
 };
 
-export default AuthContext;
+export function useAuth() {
+  const context = useContext(AuthContext);
+  return context;
+}

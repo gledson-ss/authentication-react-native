@@ -1,7 +1,7 @@
 import React, {useContext} from 'react';
 
 import {View, Button, StyleSheet} from 'react-native';
-import AuthContext from '../../contexts/auth';
+import {useAuth} from '../../contexts/auth';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
 });
 
 const SignIn: React.FC = () => {
-  const {signed, user, signIn} = useContext(AuthContext);
+  const {signed, user, signIn} = useAuth();
   console.log(signed, user);
   function handleSignIn() {
     signIn();
